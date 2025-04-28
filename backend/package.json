@@ -8,6 +8,8 @@
     "zksync-ethers": "^6.17.0"
   },
   "dependencies": {
-    "@lukso/lsp-smart-contracts": "^0.16.2"
+    "@erc725/erc725.js": "^0.27.2",
+    "@lukso/lsp-smart-contracts": "^0.16.2",
+    "dotenv": "^16.5.0"
   }
 }

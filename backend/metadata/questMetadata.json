@@ -1,0 +1,39 @@
+{
+    "LSP4Metadata": {
+        "name": "Lusko Quests",
+        "description": "Quest rewards",
+        "links": [
+            {
+                "title": "Twitter",
+                "url": "https://x.com/Kolleger4"
+            }
+        ],
+        "icon": [
+            {
+                "width": 1280,
+                "height": 720,
+                "url": "ipfs://bafkreiad43dj2d6elalgs3hm4cqljstrryryupwlxgq2njkc7uxvr4ma7e",
+                "verification": {
+                    "method": "keccak256(bytes)",
+                    "data": "0x9a87cdfa13ea14c0ead92c447c90018611f5e39fcc89b21252606555a484aee5"
+                }
+            }
+        ],
+        "images": [ 
+            [
+                {
+                    "width": 1280,
+                    "height": 720,
+                    "url": "ipfs://bafkreiad43dj2d6elalgs3hm4cqljstrryryupwlxgq2njkc7uxvr4ma7e",
+                    "verification": {
+                        "method": "keccak256(bytes)",
+                        "data": "0x9a87cdfa13ea14c0ead92c447c90018611f5e39fcc89b21252606555a484aee5"
+                    }
+                }
+            ]
+        ],
+        "assets": [ ],
+        "attributes": [
+        ]
+    }
+}
