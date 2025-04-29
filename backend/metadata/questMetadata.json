@@ -1,7 +1,7 @@
 {
     "LSP4Metadata": {
         "name": "Lusko Quests",
-        "description": "Quest rewards",
+        "description": "Collection of quests! Earn completed quests as NFTs and progress your character! The more quests you complete, the more credibility (XP) you gain!",
         "links": [
             {
                 "title": "Twitter",
@@ -12,10 +12,10 @@
             {
                 "width": 1280,
                 "height": 720,
-                "url": "ipfs://bafkreiad43dj2d6elalgs3hm4cqljstrryryupwlxgq2njkc7uxvr4ma7e",
+                "url": "ipfs://bafkreieyiulvpzhzvzxhfbirciayw6q2ugtmtmom3gqys3pvtkukezjr2m",
                 "verification": {
                     "method": "keccak256(bytes)",
-                    "data": "0x9a87cdfa13ea14c0ead92c447c90018611f5e39fcc89b21252606555a484aee5"
+                    "data": "0x95505d9738aea6a2f089ec50d346dfa0f3ef1a33a67b45ba578a694a13015043"
                 }
             }
         ],
@@ -24,10 +24,10 @@
                 {
                     "width": 1280,
                     "height": 720,
-                    "url": "ipfs://bafkreiad43dj2d6elalgs3hm4cqljstrryryupwlxgq2njkc7uxvr4ma7e",
+                    "url": "ipfs://bafkreieyiulvpzhzvzxhfbirciayw6q2ugtmtmom3gqys3pvtkukezjr2m",
                     "verification": {
                         "method": "keccak256(bytes)",
-                        "data": "0x9a87cdfa13ea14c0ead92c447c90018611f5e39fcc89b21252606555a484aee5"
+                        "data": "0x95505d9738aea6a2f089ec50d346dfa0f3ef1a33a67b45ba578a694a13015043"
                     }
                 }
             ]

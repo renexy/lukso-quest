@@ -16,9 +16,10 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "../ui/slider";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { createQuest, getNextQuestId } from "@/services/web3";
+import { completeQuest, createQuest, getNextQuestId } from "@/services/web3";
 import { useUpProvider } from "@/services/UPProvider";
 import { addQuest } from "@/services/firebase";
+import { setTokenIdMetadata } from "@/services/setNFTMetadata";
 
 type CreateQuestProps = {
   goBack: () => void;
@@ -37,17 +38,32 @@ function CreateQuest({ goBack }: CreateQuestProps) {
 
     if (!name || !description) {
       toast.error("Please fill in all fields.");
+      setLoading(false);
+      return;
+    }
+
+    if (name.length > 50) {
+      toast.error("Please make the title shorter!");
+      setLoading(false);
+      return;
+    }
+
+    if (description.length > 550) {
+      toast.error("Please make the description shorter!");
+      setLoading(false);
       return;
     }
 
     try {
       const tokenId = await getNextQuestId(chainId);
 
-      // 2. Upload metadata to pinata with tokenID from contract
-      await uploadToPinata(tokenId);
+      // 1. Upload metadata to pinata with tokenID from contract
+      const { ipfsUrl, json } = await uploadToPinata(tokenId);
 
-      // 1. Call create quest on contract
-      await createQuest(chainId, reward.toString(), client, accounts[0]);
+      // // 1. Call create quest on contract
+      await createQuest(chainId, reward.toString(), json, ipfsUrl, client, accounts[0]);
+
+      // await setTokenIdMetadata(tokenId, json, ipfsUrl);
 
       await addQuest(
         tokenId,
@@ -57,6 +73,8 @@ function CreateQuest({ goBack }: CreateQuestProps) {
         reward.toString()
       );
 
+      toast.success('Success!');
+      goBack();
       setLoading(false);
     } catch (err: any) {
       console.error(err);
@@ -67,7 +85,7 @@ function CreateQuest({ goBack }: CreateQuestProps) {
 
   const uploadToPinata = async (
     tokenId: number
-  ): Promise<{ ipfsUrl: string; downloadedJson: any }> => {
+  ): Promise<{ ipfsUrl: string; json: any }> => {
     try {
       const json = {
         LSP4Metadata: {
@@ -83,10 +101,10 @@ function CreateQuest({ goBack }: CreateQuestProps) {
             {
               width: 1280,
               height: 720,
-              url: "ipfs://bafkreiad43dj2d6elalgs3hm4cqljstrryryupwlxgq2njkc7uxvr4ma7e",
+              url: "ipfs://bafkreihg2egllgjcpensyvonk5kf3iz35qijfgfk3652ylwhnpkfwtmpwq",
               verification: {
                 method: "keccak256(bytes)",
-                data: "0x9a87cdfa13ea14c0ead92c447c90018611f5e39fcc89b21252606555a484aee5",
+                data: "0x9eaeac8a044c53020b60815d9f3c0ec8bb7bda916a1705d1941267b4bda9971f",
               },
             },
           ],
@@ -95,10 +113,10 @@ function CreateQuest({ goBack }: CreateQuestProps) {
               {
                 width: 1280,
                 height: 720,
-                url: "ipfs://bafkreiad43dj2d6elalgs3hm4cqljstrryryupwlxgq2njkc7uxvr4ma7e",
+                url: "ipfs://bafkreihg2egllgjcpensyvonk5kf3iz35qijfgfk3652ylwhnpkfwtmpwq",
                 verification: {
                   method: "keccak256(bytes)",
-                  data: "0x9a87cdfa13ea14c0ead92c447c90018611f5e39fcc89b21252606555a484aee5",
+                  data: "0x9eaeac8a044c53020b60815d9f3c0ec8bb7bda916a1705d1941267b4bda9971f",
                 },
               },
             ],
@@ -110,7 +128,7 @@ function CreateQuest({ goBack }: CreateQuestProps) {
 
       const body = {
         pinataMetadata: {
-          name: `quest-${tokenId}.json`,
+          name: `quest-${tokenId}`,
         },
         pinataContent: json,
       };
@@ -135,14 +153,23 @@ function CreateQuest({ goBack }: CreateQuestProps) {
 
       // 📥 Step: Download the JSON from Pinata (IPFS gateway)
       const downloadedRes = await axios.get(gatewayUrl);
-      const downloadedJson = downloadedRes.data;
 
-      return { ipfsUrl, downloadedJson };
+      return { ipfsUrl, json };
     } catch (error) {
       console.error(error);
       throw new Error("Failed!");
     }
   };
+
+  if (loading)
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full border-4 border-gray-300 border-t-gray-900 h-12 w-12" />
+          <p className="text-gray-500 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
 
   return (
     <div className="flex h-screen w-full items-center justify-center">

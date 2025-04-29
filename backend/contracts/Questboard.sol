@@ -20,7 +20,8 @@ contract QuestBoard is LSP8IdentifiableDigitalAsset {
         string memory symbol_,
         address newOwner_,
         uint8 lsp4TokenType_,
-        uint8 lsp8TokenIdFormat_
+        uint8 lsp8TokenIdFormat_,
+        bytes memory metadata
     )
         LSP8IdentifiableDigitalAsset(
             name_,
@@ -29,12 +30,15 @@ contract QuestBoard is LSP8IdentifiableDigitalAsset {
             lsp4TokenType_,
             lsp8TokenIdFormat_
         )
-    {}
+    {
+        _setData(hex"9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e", metadata);
+    }
 
-    function createQuest() external payable {
+    function createQuest(bytes memory metadata) external payable {
         bytes32 tokenId = bytes32(nextQuestId);
 
-        _mint(address(this), tokenId, true, "");
+        _mint(msg.sender, tokenId, true, "");
+        _setDataForTokenId(tokenId, hex"9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e", metadata);
 
         questCreators[nextQuestId] = msg.sender;
         questRewards[nextQuestId] = msg.value;
@@ -53,7 +57,7 @@ contract QuestBoard is LSP8IdentifiableDigitalAsset {
 
         bytes32 tokenId = bytes32(questId);
 
-        _transfer(address(this), winner, tokenId, true, "");
+        _transfer(msg.sender, winner, tokenId, true, "");
 
         uint256 reward = questRewards[questId];
         questRewards[questId] = 0;

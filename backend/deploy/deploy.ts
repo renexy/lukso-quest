@@ -1,42 +1,82 @@
 import env, { ethers } from "hardhat";
-import { ERC725 } from "@erc725/erc725.js";
+import { encodeData, ERC725 } from "@erc725/erc725.js";
 import metadataJson from "../metadata/questMetadata.json";
 import metadataQuestJson from "../metadata/questNftMetadata.json";
 import dotenv from "dotenv";
 import { ERC725YDataKeys } from "@lukso/lsp-smart-contracts";
 import { LSP8DataKeys } from "@lukso/lsp8-contracts";
 import { QuestBoard, QuestBoard__factory } from "../typechain-types";
-import { Contract, JsonRpcProvider, toUtf8Bytes, Wallet } from "ethers";
+import { Contract, JsonRpcProvider, toBeHex, toUtf8Bytes, Wallet } from "ethers";
 import abi from "../artifacts/contracts/Questboard.sol/QuestBoard.json";
+import erc725schema2 from "@erc725/erc725.js/schemas/LSP8IdentifiableDigitalAsset.json";
+import KeyManagerABI from "@lukso/lsp-smart-contracts/artifacts/LSP6KeyManager.json";
+import LSP4DigitalAssetSchema from "@erc725/erc725.js/schemas/LSP4DigitalAsset.json";
 
 dotenv.config();
 
+// testnet
+// const provider = new ethers.JsonRpcProvider(
+//   "https://rpc.testnet.lukso.network",
+//   {
+//     chainId: 4201,
+//     name: "luksoTestnet",
+//   }
+// );
+
 const provider = new ethers.JsonRpcProvider(
-  "https://rpc.testnet.lukso.network",
+  "https://42.rpc.thirdweb.com",
   {
-    chainId: 4201,
-    name: "luksoTestnet",
+    chainId: 42,
+    name: "luksoMainnet",
   }
 );
 
+const universalProfileAddress = process.env.PUBLIC_KEY!;
+
 async function setData() {
-  const BASE_URI = 'https://my-base-uri.com/nft/'
+  const obj = {
+    verification: {
+      method: "keccak256(utf8)",
+      data: "0x",
+    },
+    url: "ipfs://bafybeic5jxkin2zntyksec52lu3zregjwxc6frfpe6b3s627oinzh4eus4/",
+  };
+
   const signer = new Wallet(process.env.PRIVATE_KEY!, provider);
   const nftContract = new Contract(
-    "0x4AE76083d32F83eC3447ef5ef851ffC0Ca11EdB5",
+    process.env.CONTRACT_ADDRESS!,
     abi.abi,
     signer
   );
+  
+  const baseURIDataKey = ERC725YDataKeys.LSP8["LSP8TokenMetadataBaseURI"];
+
+  const test = encodeData(
+    { keyName: "LSP8TokenMetadataBaseURI", value: obj },
+    erc725schema2
+  );
 
   const tx = await nftContract.setData(
-    LSP8DataKeys.LSP8TokenMetadataBaseURI,
-    toUtf8Bytes(BASE_URI)
-  )
+    baseURIDataKey,
+    test.values[0]
+  );
+  
+  await tx.wait();
 
-  const receipt = await tx.wait();
+  const result = await nftContract.getData(baseURIDataKey);
 
-  console.log(receipt, 'receipt')
-  console.log(BASE_URI, 'baseURI')
+  const decodedBaseURI = ERC725.decodeData(
+    [
+      {
+        keyName: "LSP8TokenMetadataBaseURI",
+        value: result,
+      },
+    ],
+    erc725schema2
+  );
+
+  console.log(decodedBaseURI);
+  console.log("Base URI set to: ", result);
 }
 
 // Define the main function
@@ -49,53 +89,49 @@ async function main() {
     // Create a wallet instance using the private key and connect it to the provider
     const deployerWallet = new ethers.Wallet(deployerPrivateKey, provider);
 
+    const schema = [
+      {
+        name: "LSP4Metadata",
+        key: "0x9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e",
+        keyType: "Singleton",
+        valueType: "bytes",
+        valueContent: "VerifiableURI",
+      },
+    ];
+    const erc725 = new ERC725(schema) as any;
+    const encodedData = erc725.encodeData([
+      {
+        keyName: "LSP4Metadata",
+        value: {
+          json: JSON.stringify(metadataJson),
+          url: "ipfs://bafkreihrot6eixd4ammpmrt77djjvm6kohku2mm7ml6wh2rbih3aoyvrla",
+        },
+      },
+    ]);
+
+    console.log(encodedData, 'lol')
+
     const nftCollection: QuestBoard = await new QuestBoard__factory(
       deployerWallet
-    ).deploy("QuestBoard", "QST", deployerWallet.address, 1, 0);
+    ).deploy("QuestBoard", "QST", deployerWallet.address, 1, 0, encodedData.values[0]);
 
     await nftCollection.waitForDeployment();
 
-    const baseURIDataKey = ERC725YDataKeys.LSP8["LSP8TokenMetadataBaseURI"];
-
-    const postObj = {
-      verification: {
-        method: "keccak256(bytes)",
-        data: "0x",
-      },
-      url: "ipfs://bafybeigpyxphre5633tfroed745xriypxqizsjti5kkk2heaolkunjtqve/",
-    };
-
-    // // Set the base URI
-    const tx = await nftCollection.setData(
-      LSP8DataKeys.LSP8TokenMetadataBaseURI,
-      toUtf8Bytes(
-        "ipfs://bafybeid34vrq5hbudni74hfec47ff3nu32w2ccdu4rztih6pzwdgbhe5di/"
-      )
-    );
-
-    await tx.wait();
-
-    const result = await nftCollection.getData(baseURIDataKey);
-
     console.log(nftCollection);
-    console.log("Base URI set to: ", result);
   } catch (error) {
     console.error("Error deploying contract:", error);
   }
 }
 
 async function setCollectionMetadata() {
-  // private key
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 
-  // public key
-  const universalProfileAddress = process.env.PUBLIC_KEY!;
   const ABI = [
     "function execute(uint256 operationType, address target, uint256 value, bytes calldata data) external returns (bytes)",
   ];
 
   const universalProfile = new ethers.Contract(
-    universalProfileAddress,
+    wallet.address,
     ABI,
     wallet
   );
@@ -117,7 +153,7 @@ async function setCollectionMetadata() {
       keyName: "LSP4Metadata",
       value: {
         json: JSON.stringify(metadataJson),
-        url: "ipfs://bafkreietyjbhgpw4xvvvxgc32etgyuxzhdizmolfyv223e74imsp2smxda",
+        url: "ipfs://bafkreihrot6eixd4ammpmrt77djjvm6kohku2mm7ml6wh2rbih3aoyvrla",
       },
     },
   ]);
@@ -141,76 +177,50 @@ async function setCollectionMetadata() {
 }
 
 export async function setTokenIdMetadata() {
-  const provider = new ethers.JsonRpcProvider(
-    "https://rpc.testnet.lukso.network",
-    {
-      chainId: 4201,
-      name: "luksoTestnet",
-    }
-  );
-  const wallet = new ethers.Wallet(
-    "0x43361a4e65f999bb2fe735d873f393763a931121a4f4ee4d775e8a3cd228a34a",
-    provider
-  );
 
-  const universalProfileAddress = "0x61d397d2c872F521c0A0BCD13d1cb31ec2c8Bc05";
-  const ABI = [
-    "function execute(uint256 operationType, address target, uint256 value, bytes calldata data) external returns (bytes)",
-  ];
+  const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 
-  const universalProfile = new ethers.Contract(
-    universalProfileAddress,
-    ABI,
-    wallet
-  );
 
-  const schema = [
-    {
-      name: "LSP4Metadata",
-      key: "0x9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e",
-      keyType: "Singleton",
-      valueType: "bytes",
-      valueContent: "VerifiableURI",
-    },
-  ];
+  const url =
+    "ipfs://QmSb1kwvCZ4u84sc6hrovUgdw94ZWWRNLhdKN8kQBiDyLs";
+  const json = JSON.stringify(metadataQuestJson)
+  const erc725 = new ERC725(LSP4DigitalAssetSchema);
 
-  const erc725 = new ERC725(schema) as any;
-
-  const encodedData = erc725.encodeData([
+  const encodedMetadataURI =  erc725.encodeData([
     {
       keyName: "LSP4Metadata",
       value: {
-        json: JSON.stringify(metadataQuestJson),
-        url: "ipfs://QmQGyJQwBXgxCw5cbxVaJjmTQNvB4JxyM1gYCmA5fDkX3Y",
+        url,
+        json,
       },
     },
   ]);
 
-  // Encode the setData function call
-  const setDataInterface = new ethers.Interface([
-    "function setDataForTokenId(bytes32 tokenId, bytes32 key, bytes value) external",
-  ]);
-
-  const newTokenId = ethers.zeroPadValue(ethers.toBeHex(3), 32);
-
-  const setDataData = setDataInterface.encodeFunctionData("setDataForTokenId", [
-    newTokenId,
-    encodedData.keys[0],
-    encodedData.values[0],
-  ]);
-
-  // Call execute on the Universal Profile
-  const tx = await universalProfile.execute(
-    0, // CALL operation
-    process.env.CONTRACT_ADDRESS!, // target contract
-    0, // value (0 ETH)
-    setDataData // encoded setData call
+  const collectionAddress = process.env.CONTRACT_ADDRESS!;
+  const tokenId = toBeHex(0, 32);
+  const collection = QuestBoard__factory.connect(
+    collectionAddress,
+    signer
   );
-  await tx.wait();
+
+  const tx = await collection.setDataForTokenId(
+    tokenId,
+    encodedMetadataURI.keys[0],
+    encodedMetadataURI.values[0]
+  );
+
+  console.log(tx)
+
+  await tx.wait(1);
+
+  console.log(
+    await collection.getDataForTokenId(tokenId, encodedMetadataURI.keys[0])
+  );
 }
 
+
 // Call the main function
-setData().catch((error) => {
+main().catch((error) => {
   console.error("Error in the deployment process:", error);
   process.exitCode = 1;
 });

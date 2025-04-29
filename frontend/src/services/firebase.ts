@@ -6,7 +6,10 @@ import {
   addDoc,
   getDocs,
   query,
-  where
+  where,
+  updateDoc,
+  doc,
+  arrayUnion
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -92,3 +95,42 @@ export const getQuestByTokenId = async (tokenId: number) => {
   }
 };
 
+interface Participant {
+  discord: string;
+  powLink: string;
+  walletAddress: string;
+}
+
+export const addParticipantToQuest = async (
+  tokenId: number,
+  participant: Participant
+) => {
+  try {
+    // Reference to the quests collection
+    const questsRef = collection(db, "quests");
+
+    // Query to find the quest by tokenId
+    const q = query(questsRef, where("tokenId", "==", tokenId));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return { message: "Quest not found!", code: "NOT_FOUND" };
+    }
+
+    // Assuming tokenId is unique, get the first document
+    const questDoc = querySnapshot.docs[0];
+
+    // Update the participants array by adding the new participant object
+    const questDocRef = doc(db, "quests", questDoc.id);
+
+    // Update the participants array using arrayUnion to avoid duplicates
+    await updateDoc(questDocRef, {
+      participants: arrayUnion(participant)  // Add participant object to the array
+    });
+
+    return { message: "Participant added successfully!", code: "UPDATED" };
+  } catch (error) {
+    console.error("Error updating quest participants:", error);
+    throw error;
+  }
+};
