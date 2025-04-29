@@ -14,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
-import { createQuest, getNextQuestId } from "@/services/web3";
 import { useUpProvider } from "@/services/UPProvider";
 import { addParticipantToQuest } from "@/services/firebase";
 
@@ -24,7 +23,7 @@ type ApplyProps = {
 };
 
 function Apply({ goBack, questData }: ApplyProps) {
-  const { chainId, client, accounts } = useUpProvider();
+  const {  accounts } = useUpProvider();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState<boolean>(false);

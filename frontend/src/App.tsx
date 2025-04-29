@@ -1,11 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { useUpProvider } from "./services/UPProvider";
 import Dashboard from "./components/owner/dashboard";
-import {
-  fetchOwnedLSP8Tokens,
-  useLSP8OwnedTokens,
-} from "./hooks/useLsp8OwnedTokens";
-import { useEffect } from "react";
 
 function App() {
   const { accounts, contextAccounts } = useUpProvider();

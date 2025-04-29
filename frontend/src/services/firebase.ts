@@ -9,7 +9,8 @@ import {
   where,
   updateDoc,
   doc,
-  arrayUnion
+  arrayUnion,
+  deleteDoc
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -131,6 +132,27 @@ export const addParticipantToQuest = async (
     return { message: "Participant added successfully!", code: "UPDATED" };
   } catch (error) {
     console.error("Error updating quest participants:", error);
+    throw error;
+  }
+};
+
+export const deleteQuestByTokenId = async (tokenId: number) => {
+  try {
+    const questsRef = collection(db, "quests");
+    const q = query(questsRef, where("tokenId", "==", tokenId));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return { message: "Quest not found!", code: "NOT_FOUND" };
+    }
+
+    // Assume tokenId is unique, so delete the first matching document
+    const questDoc = querySnapshot.docs[0];
+    await deleteDoc(doc(db, "quests", questDoc.id));
+
+    return { message: "Quest deleted successfully!", code: "DELETED" };
+  } catch (error) {
+    console.error("Error deleting quest:", error);
     throw error;
   }
 };

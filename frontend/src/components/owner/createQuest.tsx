@@ -16,10 +16,9 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "../ui/slider";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { completeQuest, createQuest, getNextQuestId } from "@/services/web3";
+import { createQuest, getNextQuestId } from "@/services/web3";
 import { useUpProvider } from "@/services/UPProvider";
 import { addQuest } from "@/services/firebase";
-import { setTokenIdMetadata } from "@/services/setNFTMetadata";
 
 type CreateQuestProps = {
   goBack: () => void;
@@ -149,10 +148,6 @@ function CreateQuest({ goBack }: CreateQuestProps) {
       );
 
       const ipfsUrl = `ipfs://${res.data.IpfsHash}`;
-      const gatewayUrl = `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`;
-
-      // 📥 Step: Download the JSON from Pinata (IPFS gateway)
-      const downloadedRes = await axios.get(gatewayUrl);
 
       return { ipfsUrl, json };
     } catch (error) {

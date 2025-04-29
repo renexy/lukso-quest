@@ -86,14 +86,16 @@ export const getNextQuestId = async (chainId: any) => {
 export const completeQuest = async (
   chainId: any,
   walletClient: any,
-  account: any
+  account: any,
+  tokenId: number,
+  winner: any
 ) => {
   try {
     const txHash = await walletClient.writeContract({
       address: contractAddress as `0x${string}`,
       abi: abi.abi,
       functionName: "completeQuest",
-      args: [0, "0x61d397d2c872F521c0A0BCD13d1cb31ec2c8Bc05", 50],
+      args: [tokenId, winner, 50],
       account: account,
     });
 
