@@ -7,6 +7,22 @@ import profileSchema from "@erc725/erc725.js/schemas/LSP3ProfileMetadata.json";
 
 const contractAddress = import.meta.env.VITE_LUKSO_CONTRACT_ADDRESS;
 
+let test: any;
+
+const getContractAddress = async (): Promise<string | null> => {
+  try {
+    const res = await fetch('/api/get-contract-address');
+    const data = await res.json();
+    test = data;
+    return data.address;
+  } catch (err) {
+    console.error("Failed to fetch contract address:", err);
+    return null;
+  }
+};
+
+await getContractAddress();
+
 export const createQuest = async (
   chainId: any,
   entryFee: string,
@@ -16,6 +32,7 @@ export const createQuest = async (
   account: any
 ) => {
   try {
+    console.log(test, 'lol');
     const schema = [
       {
         name: "LSP4Metadata",
