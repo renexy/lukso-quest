@@ -21,7 +21,16 @@ const getContractAddress = async (): Promise<string | null> => {
   }
 };
 
-await getContractAddress();
+const initializeContractAddress = async () => {
+  const address = await getContractAddress();
+  if (address) {
+    console.log("Fetched contract address:", address);
+  }
+};
+
+initializeContractAddress().catch((err) => {
+  console.error("Error initializing contract address:", err);
+});
 
 export const createQuest = async (
   chainId: any,
