@@ -17,11 +17,11 @@
     "module": "ESNext",
     "skipLibCheck": true,
     /* Bundler mode */
-    "moduleResolution": "bundler",
+    "moduleResolution": "bundler",  // This is good for Vite's bundling
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "noEmit": true,
+    "noEmit": true,  // No emitting since Vite handles this
     "jsx": "react-jsx",
     /* Linting */
     "strict": true,

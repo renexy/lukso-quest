@@ -9,14 +9,19 @@
     }
   ],
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
+    "target": "ES2020", // or higher depending on your Node version
+    "module": "ESNext", // ES Module syntax
+    "moduleResolution": "node", // ensures module resolution works like Node.js
+    "esModuleInterop": true, // for importing CommonJS modules
+    "skipLibCheck": true,
+    "strict": true, // or false depending on your preference
+    "types": ["vite/client", "node"], // make sure to use a single "types" array
+    "outDir": "./dist", // or wherever you want to transpile to
     "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
       ]
-    },
-    "types": ["vite/client", "node"]
+    }
   }
 }
