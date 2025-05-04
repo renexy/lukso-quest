@@ -67,9 +67,6 @@ contract QuestBoard is LSP8IdentifiableDigitalAsset {
             (bool sent, ) = winner.call{value: reward}("");
             require(sent, "Reward transfer failed");
         }
-
-        questCompleted[questId] = true;
-
         emit QuestCompleted(questId, winner, xp);
     }
 }
