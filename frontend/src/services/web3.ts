@@ -138,7 +138,7 @@ export const getProfileData = async (account: any, chainId: any) => {
     if (!response.ok) throw new Error("Failed to fetch IPFS data");
 
     const text = await response.json();
-    if (text.LSP3Profile.name && text.LSP3Profile.name.length > 0)
+    if (text.LSP3Profile)
       return text.LSP3Profile;
   } catch (error) {
     console.error("Error fetching IPFS data:", error);

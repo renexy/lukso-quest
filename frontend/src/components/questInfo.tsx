@@ -71,7 +71,7 @@ function QuestInfo({ goBack, tokenId }: QuestInfoProps) {
 
       setParticipants(enrichedParticipants ?? []);
 
-      setUserName(ownerData.name ?? data?.ownerAddress?.toLowerCase());
+      setUserName(ownerData?.name ?? data?.ownerAddress?.toLowerCase());
       setUserImage(ownerProfileImage);
       setQuestData(data);
       setLoading(false);
