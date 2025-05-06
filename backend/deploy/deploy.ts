@@ -24,7 +24,7 @@ const provider = new ethers.JsonRpcProvider(
 // );
 async function main() {
   try {
-    const deployerPrivateKey = "0x43361a4e65f999bb2fe735d873f393763a931121a4f4ee4d775e8a3cd228a34a";
+    const deployerPrivateKey = "pk";
 
     const deployerWallet = new ethers.Wallet(deployerPrivateKey, provider);
 
